@@ -23,7 +23,7 @@
       <title>Sensor Location</title>
       <map>
         <search>
-          <query>sourcetype=sensor | stats count by sensorIP | fields sensorIP | iplocation prefix=iploc_ allfields=true sensorIP | geostats latfield=iploc_lat longfield=iploc_lon count by sensorIP</query>
+          <query>index=honeypot* sourcetype=sensor | stats count by sensorIP | fields sensorIP | iplocation prefix=iploc_ allfields=true sensorIP | geostats latfield=iploc_lat longfield=iploc_lon count by sensorIP</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>

@@ -15,7 +15,7 @@
       <input type="dropdown" token="sensor" searchWhenChanged="true">
         <label>Sensor</label>
         <search>
-          <query>sourcetype=kippojson command=* | table host | dedup host</query>
+          <query>index=honeypot* sourcetype=kippojson command=* | table host | dedup host</query>
           <earliest>-7d@h</earliest>
           <latest>now</latest>
         </search>
@@ -26,7 +26,7 @@
       </input>
       <table id="master">
         <search>
-          <query>sourcetype=cowrie host=$sensor$ |  stats earliest(_time) as Time, values(src_ip) AS "Attacker IP", values(host) as "Sensor", count(input) as msgcount by session | where msgcount &gt; 1 | eval Time=strftime(Time,"%m/%d/%y %H:%M:%S") | rename msgcount AS "Message Count" session AS "Session"| sort - Time</query>
+          <query>index=honeypot* sourcetype=cowrie host=$sensor$ |  stats earliest(_time) as Time, values(src_ip) AS "Attacker IP", values(host) as "Sensor", count(input) as msgcount by session | where msgcount &gt; 1 | eval Time=strftime(Time,"%m/%d/%y %H:%M:%S") | rename msgcount AS "Message Count" session AS "Session"| sort - Time</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>
@@ -36,8 +36,8 @@
           <!-- Use set to specify the new token to be created.
                      Use any token from the page or from the click event to produce the value needed. -->
           <set token="session">$row.Session$</set>
-          <!-- If we also set the form.sourcetype the input will get updated too -->
-          <set token="form.sourcetype">$row.Session$</set>
+          <!-- If we also set the form.index=honeypot* sourcetype the input will get updated too -->
+          <set token="form.index=honeypot* sourcetype">$row.Session$</set>
         </drilldown>
         <option name="wrap">true</option>
         <option name="rowNumbers">false</option>
@@ -51,7 +51,7 @@
       <title>Session Time</title>
       <single>
         <search>
-          <query>sourcetype=cowrie session=$session$ | transaction session  | rename _time as starttime |  eval starttime=strftime(starttime,"%m/%d/%y %H:%M:%S") | table starttime</query>
+          <query>index=honeypot* sourcetype=cowrie session=$session$ | transaction session  | rename _time as starttime |  eval starttime=strftime(starttime,"%m/%d/%y %H:%M:%S") | table starttime</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>
@@ -74,7 +74,7 @@
       </single>
       <single>
         <search>
-          <query>sourcetype=cowrie session=$session$ | transaction session | eval starttime=_time | eval endtime=_time+duration | eval starttime=strftime(starttime,"%m/%d/%y %H:%M:%S") | eval endtime=strftime(endtime,"%m/%d/%y %H:%M:%S") | table endtime</query>
+          <query>index=honeypot* sourcetype=cowrie session=$session$ | transaction session | eval starttime=_time | eval endtime=_time+duration | eval starttime=strftime(starttime,"%m/%d/%y %H:%M:%S") | eval endtime=strftime(endtime,"%m/%d/%y %H:%M:%S") | table endtime</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>
@@ -97,7 +97,7 @@
       </single>
       <single>
         <search>
-          <query>sourcetype=cowrie session=$session$ | transaction session | table duration | eval duration=round(duration/60,2)</query>
+          <query>index=honeypot* sourcetype=cowrie session=$session$ | transaction session | table duration | eval duration=round(duration/60,2)</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>
@@ -121,7 +121,7 @@
       <title>Passwords Accepted</title>
       <table>
         <search>
-          <query>sourcetype=cowrie session=$session$ eventtype=login_success | table password | rename password AS "Password Accepted"</query>
+          <query>index=honeypot* sourcetype=cowrie session=$session$ eventtype=login_success | table password | rename password AS "Password Accepted"</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>
@@ -136,7 +136,7 @@
       <title>Passwords Attempted</title>
       <table>
         <search>
-          <query>sourcetype=cowrie session=$session$   eventtype=login_attempt | table password | rename password AS "Password Attempted"</query>
+          <query>index=honeypot* sourcetype=cowrie session=$session$   eventtype=login_attempt | table password | rename password AS "Password Attempted"</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>
@@ -154,7 +154,7 @@
       <table id="detail" depends="$session$">
         <title>Session: $session$</title>
         <search>
-          <query>sourcetype=cowrie session=$session$ input=* | table input, timestamp | rename input AS "Command" timestamp AS "Timestamp"</query>
+          <query>index=honeypot* sourcetype=cowrie session=$session$ input=* | table input, timestamp | rename input AS "Command" timestamp AS "Timestamp"</query>
           <earliest>0</earliest>
           <latest></latest>
         </search>
@@ -199,7 +199,7 @@
       <title>Files Downloaded During Session</title>
       <table>
         <search>
-          <query>sourcetype=cowrie [ search sourcetype=cowrie shasum=* session=$session$ | stats count by session | fields session ] | transaction session | table url, shasum | dedup shasum | lookup virustotal.csv "SHA256 Hash" AS shasum OUTPUT "Vendor Signatures" | makemv delim="|" "Vendor Signatures" |fillnull value="Unknown" "Vendor Signatures"| mvexpand "Vendor Signatures" | dedup "Vendor Signatures"  | stats values(url) AS "URL" values(shasum) AS "SHA256 Hash" values("Vendor Signatures") AS "Vendor Signatures"</query>
+          <query>index=honeypot* sourcetype=cowrie [ search index=honeypot* sourcetype=cowrie shasum=* session=$session$ | stats count by session | fields session ] | transaction session | table url, shasum | dedup shasum | lookup virustotal.csv "SHA256 Hash" AS shasum OUTPUT "Vendor Signatures" | makemv delim="|" "Vendor Signatures" |fillnull value="Unknown" "Vendor Signatures"| mvexpand "Vendor Signatures" | dedup "Vendor Signatures"  | stats values(url) AS "URL" values(shasum) AS "SHA256 Hash" values("Vendor Signatures") AS "Vendor Signatures"</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>
@@ -216,7 +216,7 @@
       <title>Raw Session Log</title>
       <table>
         <search>
-          <query>sourcetype=cowrie session=$session$  | table _raw | sort + _time | rename _raw AS "Raw Logs"</query>
+          <query>index=honeypot* sourcetype=cowrie session=$session$  | table _raw | sort + _time | rename _raw AS "Raw Logs"</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>

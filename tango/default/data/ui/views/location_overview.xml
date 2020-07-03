@@ -14,7 +14,7 @@
       <title>Top Countries w/ Login</title>
       <chart>
         <search>
-          <query>sourcetype=cowrie | transaction session | search eventtype=login_success | iplocation prefix=iploc_ allfields=true src_ip | top iploc_Country limit=5</query>
+          <query>index=honeypot* sourcetype=cowrie | transaction session | search eventtype=login_success | iplocation prefix=iploc_ allfields=true src_ip | top iploc_Country limit=5</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>
@@ -48,7 +48,7 @@
       <title>Top Country Scanning</title>
       <chart>
         <search>
-          <query>sourcetype=cowrie | transaction session  | iplocation prefix=iploc_ allfields=true src_ip | top iploc_Country limit=5</query>
+          <query>index=honeypot* sourcetype=cowrie | transaction session  | iplocation prefix=iploc_ allfields=true src_ip | top iploc_Country limit=5</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>
@@ -82,7 +82,7 @@
       <title>Top Sensors Attacked</title>
       <chart>
         <search>
-          <query>sourcetype=cowrie eventtype=login_success | stats count by host | head 5</query>
+          <query>index=honeypot* sourcetype=cowrie eventtype=login_success | stats count by host | head 5</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>
@@ -118,7 +118,7 @@
       <title>Attacker Location Map</title>
       <map>
         <search>
-          <query>sourcetype=cowrie | stats count by src_ip | fields src_ip | iplocation prefix=iploc_ allfields=true src_ip | geostats latfield=iploc_lat longfield=iploc_lon count by src_ip</query>
+          <query>index=honeypot* sourcetype=cowrie | stats count by src_ip | fields src_ip | iplocation prefix=iploc_ allfields=true src_ip | geostats latfield=iploc_lat longfield=iploc_lon count by src_ip</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>

@@ -15,7 +15,7 @@
       <title>Human vs. Bot Identification (Best Guess)</title>
       <chart>
         <search>
-          <query>sourcetype=cowrie version=* | eval identification=if(searchmatch("version=*openssh*"),"Human","Bot")  | stats count by identification</query>
+          <query>index=honeypot* sourcetype=cowrie version=* | eval identification=if(searchmatch("version=*openssh*"),"Human","Bot")  | stats count by identification</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>
@@ -49,7 +49,7 @@
       <title>SSH Versions</title>
       <table>
         <search>
-          <query>sourcetype=cowrie | stats count by version |  rename version AS "Attacker SSH Versions" | sort - count</query>
+          <query>index=honeypot* sourcetype=cowrie | stats count by version |  rename version AS "Attacker SSH Versions" | sort - count</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>
@@ -66,7 +66,7 @@
       <title>Environment Details</title>
       <table>
         <search>
-          <query>sourcetype=cowrie  | stats count by terminal_size | rename terminal_size AS "Session Environment Details"</query>
+          <query>index=honeypot* sourcetype=cowrie  | stats count by terminal_size | rename terminal_size AS "Session Environment Details"</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>
@@ -81,7 +81,7 @@
       <title>Sessions with Command Interaction</title>
       <single>
         <search>
-          <query>sourcetype=cowrie input=* | stats dc(session) AS dcount | appendcols [search sourcetype=cowrie | stats dc(session) AS ddcount] | eval total=(dcount/ddcount*100) | fields - dcount ddcount  | eval total=round(total,2)</query>
+          <query>index=honeypot* sourcetype=cowrie input=* | stats dc(session) AS dcount | appendcols [search index=honeypot* sourcetype=cowrie | stats dc(session) AS ddcount] | eval total=(dcount/ddcount*100) | fields - dcount ddcount  | eval total=round(total,2)</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>
@@ -105,7 +105,7 @@
       <title>Top Commands Entered During Session</title>
       <table>
         <search>
-          <query>sourcetype=cowrie | top input | fields - percent | rename input AS "Command Entered"</query>
+          <query>index=honeypot* sourcetype=cowrie | top input | fields - percent | rename input AS "Command Entered"</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>
@@ -120,7 +120,7 @@
       <title>Rare Commands Entered During Session</title>
       <table>
         <search>
-          <query>sourcetype=cowrie | rare input | fields - percent | rename input AS "Command Entered"</query>
+          <query>index=honeypot* sourcetype=cowrie | rare input | fields - percent | rename input AS "Command Entered"</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
         </search>

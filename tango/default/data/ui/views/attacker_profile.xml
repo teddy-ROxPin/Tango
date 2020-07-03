@@ -56,7 +56,7 @@
       <single>
         <title>Earliest Time Seen</title>
         <search>
-          <query>sourcetype=cowrie [ search sourcetype=cowrie src_ip=$ipaddress$ | stats count by session | fields session ] | transaction session | stats earliest(_time) as Time | eval Time=strftime(Time,"%m/%d/%y %H:%M:%S")</query>
+          <query>index=honeypot* sourcetype=cowrie [ search index=honeypot* sourcetype=cowrie src_ip=$ipaddress$ | stats count by session | fields session ] | transaction session | stats earliest(_time) as Time | eval Time=strftime(Time,"%m/%d/%y %H:%M:%S")</query>
           <earliest>0</earliest>
           <latest></latest>
         </search>
@@ -75,7 +75,7 @@
       <single>
         <title>Latest Time Seen</title>
         <search>
-          <query>sourcetype=cowrie [ search sourcetype=cowrie src_ip=$ipaddress$ | stats count by session | fields session ] | transaction session | stats latest(_time) as Time | eval Time=strftime(Time,"%m/%d/%y %H:%M:%S")</query>
+          <query>index=honeypot* sourcetype=cowrie [ search index=honeypot* sourcetype=cowrie src_ip=$ipaddress$ | stats count by session | fields session ] | transaction session | stats latest(_time) as Time | eval Time=strftime(Time,"%m/%d/%y %H:%M:%S")</query>
           <earliest>0</earliest>
           <latest></latest>
         </search>
@@ -96,7 +96,7 @@
       <title>SSH Clients Seen</title>
       <table>
         <search>
-          <query>sourcetype=cowrie [ search sourcetype=cowrie src_ip=$ipaddress$ | stats count by session | fields session ] | transaction session | stats count by version | rename version AS "SSH Client" | fields - count</query>
+          <query>index=honeypot* sourcetype=cowrie [ search index=honeypot* sourcetype=cowrie src_ip=$ipaddress$ | stats count by session | fields session ] | transaction session | stats count by version | rename version AS "SSH Client" | fields - count</query>
           <earliest>0</earliest>
           <latest></latest>
         </search>
@@ -113,7 +113,7 @@
       <title>Sessions with Interaction</title>
       <table id="master">
         <search>
-          <query>sourcetype=cowrie [ search sourcetype=cowrie eventtype=login_success  | stats count by session | fields session ] | transaction session| search src_ip=$ipaddress$ | stats count(input) as count by session | where count &gt; 1 | fields - count | rename session as "Session"</query>
+          <query>index=honeypot* sourcetype=cowrie [ search index=honeypot* sourcetype=cowrie eventtype=login_success  | stats count by session | fields session ] | transaction session| search src_ip=$ipaddress$ | stats count(input) as count by session | where count &gt; 1 | fields - count | rename session as "Session"</query>
           <earliest>$field2.earliest$</earliest>
           <latest>$field2.latest$</latest>
         </search>
@@ -123,8 +123,8 @@
           <!-- Use set to specify the new token to be created.
                      Use any token from the page or from the click event to produce the value needed. -->
           <set token="session">$row.Session$</set>
-          <!-- If we also set the form.sourcetype the input will get updated too -->
-          <set token="form.sourcetype">$row.Session$</set>
+          <!-- If we also set the form.index=honeypot* sourcetype the input will get updated too -->
+          <set token="form.index=honeypot* sourcetype">$row.Session$</set>
         </drilldown>
         <option name="wrap">true</option>
         <option name="rowNumbers">false</option>
@@ -139,7 +139,7 @@
       <table id="detail" depends="$session$">
         <title>Session: $session$</title>
         <search>
-          <query>sourcetype=cowrie session=$session$ input=* | table input, timestamp | rename input AS "Command" timestamp AS "Timestamp" | sort +"Timestamp"</query>
+          <query>index=honeypot* sourcetype=cowrie session=$session$ input=* | table input, timestamp | rename input AS "Command" timestamp AS "Timestamp" | sort +"Timestamp"</query>
           <earliest>$field2.earliest$</earliest>
           <latest>$field2.latest$</latest>
         </search>
@@ -184,7 +184,7 @@
       <title>Files Downloaded</title>
       <table>
         <search>
-          <query>sourcetype=cowrie [ search sourcetype=cowrie shasum=* | stats count by session | fields session ] | transaction session | search src_ip=$ipaddress$ | table url, shasum | dedup shasum | lookup virustotal.csv "SHA256 Hash" AS shasum OUTPUT "Vendor Signatures" | rename url AS "URL" shasum AS "SHA256 Hash" | makemv delim="|" "Vendor Signatures" | fillnull value="Unknown"</query>
+          <query>index=honeypot* sourcetype=cowrie [ search index=honeypot* sourcetype=cowrie shasum=* | stats count by session | fields session ] | transaction session | search src_ip=$ipaddress$ | table url, shasum | dedup shasum | lookup virustotal.csv "SHA256 Hash" AS shasum OUTPUT "Vendor Signatures" | rename url AS "URL" shasum AS "SHA256 Hash" | makemv delim="|" "Vendor Signatures" | fillnull value="Unknown"</query>
           <earliest>$field2.earliest$</earliest>
           <latest>$field2.latest$</latest>
         </search>

@@ -5,7 +5,7 @@
     <input type="dropdown" token="sensor">
       <label>Sensor</label>
       <search>
-        <query>sourcetype=sensor | stats count by host | fields - count</query>
+        <query>index=honeypot* sourcetype=sensor | stats count by host | fields - count</query>
         <earliest>-24h@h</earliest>
         <latest>now</latest>
       </search>
